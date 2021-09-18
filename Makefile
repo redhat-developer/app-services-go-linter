@@ -3,3 +3,6 @@ binary:
 
 lint:
 	golangci-lint run cmd/... pkg/...
+
+test:
+	go test ./pkg/...
