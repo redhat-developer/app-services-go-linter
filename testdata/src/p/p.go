@@ -30,9 +30,12 @@ func (l *Goi18n) MustLocalizeError(id string) error {
 func testFunc() error {
 	a := Goi18n{}
 	a.path = a.MustLocalize("test.path.string")
+	a.format = a.MustLocalize("another.message.exist")
 
 	if 2+2 == 5 {
 		return a.MustLocalizeError("test.return.error.message")
+	} else {
+		return a.MustLocalizeError("test.message.exist")
 	}
 
 	return nil
