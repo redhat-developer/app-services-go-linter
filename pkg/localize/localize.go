@@ -4,18 +4,18 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"io/fs"
-	"sort"
-
 	"gopkg.in/yaml.v2"
+	"io/fs"
+	"os"
+	"path/filepath"
 
 	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 )
 
-type Goi18n struct {
-	files        fs.FS
+type Localize struct {
+	fsys         fs.FS
 	language     *language.Tag
 	bundle       *i18n.Bundle
 	translations []i18n.MessageFile
@@ -24,33 +24,34 @@ type Goi18n struct {
 }
 
 var (
-	//go:embed locales
 	defaultLocales  embed.FS
 	defaultLanguage = &language.English
 )
 
 type Config struct {
-	files    fs.FS
+	fsys     fs.FS
 	language *language.Tag
 	format   string
 	path     string
-}
-
-func GetDefaultLocales() fs.FS {
-	return defaultLocales
 }
 
 func GetDefaultLanguage() *language.Tag {
 	return defaultLanguage
 }
 
-func New(cfg *Config) (*Goi18n, error) {
+func New(cfg *Config) (*Localize, error) {
 	if cfg == nil {
 		cfg = &Config{}
 	}
-	if cfg.files == nil {
-		cfg.files = GetDefaultLocales()
-		cfg.path = "locales"
+
+	wd, err1 := os.Getwd()
+	if err1 != nil {
+		fmt.Errorf("Failed to get wd: %s", err1)
+	}
+
+	if cfg.fsys == nil {
+		cfg.path = filepath.Join(wd, "localize", "locales")
+		cfg.fsys = os.DirFS(cfg.path)
 		cfg.format = "toml"
 	}
 	if cfg.language == nil {
@@ -61,8 +62,8 @@ func New(cfg *Config) (*Goi18n, error) {
 	}
 
 	bundle := i18n.NewBundle(*cfg.language)
-	loc := &Goi18n{
-		files:    cfg.files,
+	loc := &Localize{
+		fsys:     cfg.fsys,
 		language: cfg.language,
 		bundle:   bundle,
 		format:   cfg.format,
@@ -73,23 +74,22 @@ func New(cfg *Config) (*Goi18n, error) {
 	return loc, err
 }
 
-// walk the file system and load each file into memory
-func (l *Goi18n) load() error {
-	return fs.WalkDir(l.files, l.path, func(path string, info fs.DirEntry, err error) error {
+func (l *Localize) load() error {
+	return fs.WalkDir(l.fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if info.IsDir() {
+		if d.IsDir() {
 			return nil
 		}
 
-		return l.MustLocalizeFile(l.files, path)
+		return l.MustLocalizeFile(l.fsys, path)
 	})
 }
 
-func (l *Goi18n) MustLocalizeFile(files fs.FS, path string) (err error) {
-	buf, err := fs.ReadFile(files, path)
+func (l *Localize) MustLocalizeFile(fsys fs.FS, path string) (err error) {
+	buf, err := fs.ReadFile(fsys, path)
 	if err != nil {
 		return err
 	}
@@ -117,19 +117,6 @@ func (l *Goi18n) MustLocalizeFile(files fs.FS, path string) (err error) {
 	return nil
 }
 
-func (l *Goi18n) GetTranslations() []i18n.MessageFile {
+func (l *Localize) GetTranslations() []i18n.MessageFile {
 	return l.translations
-}
-
-func (l *Goi18n) FindTranslationString(key string) {
-	for _, file := range l.translations {
-		fmt.Println(key)
-		id := sort.Search(len(file.Messages), func(i int) bool {
-			return file.Messages[i].ID == key
-		})
-
-		if id < len(file.Messages) && file.Messages[id].ID == key {
-			fmt.Println(id)
-		}
-	}
 }
