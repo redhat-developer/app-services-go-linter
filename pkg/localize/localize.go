@@ -4,14 +4,13 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"github.com/BurntSushi/toml"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/text/language"
 	"gopkg.in/yaml.v2"
 	"io/fs"
 	"os"
 	"path/filepath"
-
-	"github.com/BurntSushi/toml"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"golang.org/x/text/language"
 )
 
 type Localize struct {
@@ -39,18 +38,13 @@ func GetDefaultLanguage() *language.Tag {
 	return defaultLanguage
 }
 
-func New(cfg *Config) (*Localize, error) {
+func New(cfg *Config, d string) (*Localize, error) {
 	if cfg == nil {
 		cfg = &Config{}
 	}
 
-	wd, err1 := os.Getwd()
-	if err1 != nil {
-		fmt.Errorf("Failed to get wd: %s", err1)
-	}
-
 	if cfg.fsys == nil {
-		cfg.path = filepath.Join(wd, "localize", "locales")
+		cfg.path = filepath.Join(d, "pkg", "localize", "locales")
 		cfg.fsys = os.DirFS(cfg.path)
 		cfg.format = "toml"
 	}
