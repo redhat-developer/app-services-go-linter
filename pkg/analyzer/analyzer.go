@@ -20,6 +20,7 @@ var (
 		RunDespiteErrors: true,
 	}
 
+	// flag variables
 	path              string
 	mustLocalize      string
 	mustLocalizeError string
@@ -31,6 +32,7 @@ type instantiate struct {
 }
 
 func (i *instantiate) run(pass *analysis.Pass) (interface{}, error) {
+	// This task will be executed only once to read flags and i18n messages from files.
 	task := func() {
 		i.messages = make(map[string]string)
 		localizer, err := localize.New(nil, path)
@@ -69,7 +71,7 @@ func (i *instantiate) run(pass *analysis.Pass) (interface{}, error) {
 					}
 					str := strings.Trim(args.Value, "\"")
 					if i.messages[str] == "" {
-						pass.Reportf(args.Pos(), "Translation string '%s' doesn't exist", str)
+						pass.Reportf(args.Pos(), "Translation string with ID '%s' doesn't exist", str)
 					}
 				}
 			}
@@ -84,7 +86,7 @@ func runOnce(once *sync.Once, onceBody func()) {
 }
 
 func init() {
-	Analyzer.Flags.StringVar(&path, "path", "", "Path to the directory with localization files")
-	Analyzer.Flags.StringVar(&mustLocalize, "mustLocalize", "MustLocalize", "")
-	Analyzer.Flags.StringVar(&mustLocalizeError, "mustLocalizeError", "MustLocalizeError", "")
+	Analyzer.Flags.StringVar(&path, "path", "", "Path to the directory with localization files. If nothing specified, linter will try to load i18n messages from files located in pkg/localize/locales directory.")
+	Analyzer.Flags.StringVar(&mustLocalize, "mustLocalize", "MustLocalize", "Name of the function that loads an i18n message.")
+	Analyzer.Flags.StringVar(&mustLocalizeError, "mustLocalizeError", "MustLocalizeError", "Name of the function that creates new error with i18n message.")
 }
