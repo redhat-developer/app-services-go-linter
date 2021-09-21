@@ -1,7 +1,6 @@
 package localize
 
 import (
-	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/BurntSushi/toml"
@@ -23,7 +22,6 @@ type Localize struct {
 }
 
 var (
-	defaultLocales  embed.FS
 	defaultLanguage = &language.English
 )
 
