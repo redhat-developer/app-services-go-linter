@@ -44,7 +44,11 @@ func New(cfg *Config, d string) (*Localize, error) {
 	}
 
 	if cfg.fsys == nil {
-		cfg.path = filepath.Join(d, "pkg", "localize", "locales")
+		if d != "" {
+			cfg.path = filepath.Join(d)
+		} else {
+			cfg.path = filepath.Join(d, "pkg", "localize", "locales")
+		}
 		cfg.fsys = os.DirFS(cfg.path)
 		cfg.format = "toml"
 	}

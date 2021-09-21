@@ -8,36 +8,44 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 	"log"
 	"strings"
+	"sync"
 )
 
-var Analyzer = &analysis.Analyzer{
-	Name:             "goi18nlinter",
-	Doc:              "goi18nlinter",
-	Run:              run,
-	Requires:         []*analysis.Analyzer{inspect.Analyzer},
-	RunDespiteErrors: true,
-}
-
-var path string
-var messages map[string]string
-
-func init() {
-	Analyzer.Flags.StringVar(&path, "path", "", "Path to the project directory")
-	messages = make(map[string]string)
-
-	localizer, err := localize.New(nil, path)
-	if err != nil {
-		log.Panicln(err)
+var (
+	Analyzer = &analysis.Analyzer{
+		Name:             "goi18nlinter",
+		Doc:              "goi18nlinter",
+		Run:              new(instantiate).run,
+		Requires:         []*analysis.Analyzer{inspect.Analyzer},
+		RunDespiteErrors: true,
 	}
 
-	for _, file := range localizer.GetTranslations() {
-		for _, msg := range file.Messages {
-			messages[msg.ID] = msg.One
+	path              string
+	mustLocalize      string
+	mustLocalizeError string
+)
+
+type instantiate struct {
+	once     sync.Once
+	messages map[string]string
+}
+
+func (i *instantiate) run(pass *analysis.Pass) (interface{}, error) {
+	task := func() {
+		i.messages = make(map[string]string)
+		localizer, err := localize.New(nil, path)
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		for _, file := range localizer.GetTranslations() {
+			for _, msg := range file.Messages {
+				i.messages[msg.ID] = msg.One
+			}
 		}
 	}
-}
+	runOnce(&i.once, task)
 
-func run(pass *analysis.Pass) (interface{}, error) {
 	ins := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{
 		(*ast.CallExpr)(nil),
@@ -53,14 +61,14 @@ func run(pass *analysis.Pass) (interface{}, error) {
 				return
 			}
 
-			if s.Sel.Name == "MustLocalize" || s.Sel.Name == "MustLocalizeError" {
+			if s.Sel.Name == mustLocalize || s.Sel.Name == mustLocalizeError {
 				if len(n.Args) > 0 {
 					args, ok := n.Args[0].(*ast.BasicLit)
 					if !ok {
 						return
 					}
 					str := strings.Trim(args.Value, "\"")
-					if messages[str] == "" {
+					if i.messages[str] == "" {
 						pass.Reportf(args.Pos(), "Translation string '%s' doesn't exist", str)
 					}
 				}
@@ -69,4 +77,14 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	})
 
 	return nil, nil
+}
+
+func runOnce(once *sync.Once, onceBody func()) {
+	once.Do(onceBody)
+}
+
+func init() {
+	Analyzer.Flags.StringVar(&path, "path", "", "Path to the directory with localization files")
+	Analyzer.Flags.StringVar(&mustLocalize, "mustLocalize", "MustLocalize", "")
+	Analyzer.Flags.StringVar(&mustLocalizeError, "mustLocalizeError", "MustLocalizeError", "")
 }
