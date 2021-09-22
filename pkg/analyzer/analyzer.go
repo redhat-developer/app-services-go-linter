@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	// An Analyzer describes an analysis function and its options.
+	// Analyzer describes an analysis function and its options.
 	Analyzer = &analysis.Analyzer{
 		Name:             "goi18nlinter",
 		Doc:              "goi18nlinter",
