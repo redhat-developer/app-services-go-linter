@@ -1,7 +1,6 @@
 package localize
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -97,8 +96,6 @@ func (l *localize) loadLocalizationFile(fsys fs.FS, path string) (err error) {
 		unmarshalFunc = toml.Unmarshal
 	case "yaml", "yml":
 		unmarshalFunc = yaml.Unmarshal
-	case "json":
-		unmarshalFunc = json.Unmarshal
 	default:
 		return fmt.Errorf("unsupported format \"%v\"", l.format)
 	}
