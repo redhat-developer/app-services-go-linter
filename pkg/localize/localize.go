@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 )
 
-type Localize struct {
+type localize struct {
 	fsys         fs.FS
 	language     *language.Tag
 	bundle       *i18n.Bundle
@@ -25,20 +25,21 @@ var (
 	defaultLanguage = &language.English
 )
 
-type Config struct {
+type config struct {
 	fsys     fs.FS
 	language *language.Tag
 	format   string
 	path     string
 }
 
-func GetDefaultLanguage() *language.Tag {
+func getDefaultLanguage() *language.Tag {
 	return defaultLanguage
 }
 
-func New(cfg *Config, d string) (*Localize, error) {
+// New loads localization files from a specified directory
+func New(cfg *config, d string) (*localize, error) {
 	if cfg == nil {
-		cfg = &Config{}
+		cfg = &config{}
 	}
 
 	if cfg.fsys == nil {
@@ -51,14 +52,14 @@ func New(cfg *Config, d string) (*Localize, error) {
 		cfg.format = "toml"
 	}
 	if cfg.language == nil {
-		cfg.language = GetDefaultLanguage()
+		cfg.language = getDefaultLanguage()
 	}
 	if cfg.format == "" {
 		cfg.format = "toml"
 	}
 
 	bundle := i18n.NewBundle(*cfg.language)
-	loc := &Localize{
+	loc := &localize{
 		fsys:     cfg.fsys,
 		language: cfg.language,
 		bundle:   bundle,
@@ -70,7 +71,7 @@ func New(cfg *Config, d string) (*Localize, error) {
 	return loc, err
 }
 
-func (l *Localize) load() error {
+func (l *localize) load() error {
 	return fs.WalkDir(l.fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -80,16 +81,16 @@ func (l *Localize) load() error {
 			return nil
 		}
 
-		return l.MustLocalizeFile(l.fsys, path)
+		return l.loadLocalizationFile(l.fsys, path)
 	})
 }
 
-func (l *Localize) MustLocalizeFile(fsys fs.FS, path string) (err error) {
+func (l *localize) loadLocalizationFile(fsys fs.FS, path string) (err error) {
 	buf, err := fs.ReadFile(fsys, path)
 	if err != nil {
 		return err
 	}
-	fileext := fmt.Sprintf("%v.%v", l.language.String(), l.format)
+	fileExt := fmt.Sprintf("%v.%v", l.language.String(), l.format)
 	var unmarshalFunc i18n.UnmarshalFunc
 	switch l.format {
 	case "toml":
@@ -103,7 +104,7 @@ func (l *Localize) MustLocalizeFile(fsys fs.FS, path string) (err error) {
 	}
 
 	l.bundle.RegisterUnmarshalFunc(l.format, unmarshalFunc)
-	file, err := l.bundle.ParseMessageFileBytes(buf, fileext)
+	file, err := l.bundle.ParseMessageFileBytes(buf, fileExt)
 	if err != nil {
 		return err
 	}
@@ -113,6 +114,7 @@ func (l *Localize) MustLocalizeFile(fsys fs.FS, path string) (err error) {
 	return nil
 }
 
-func (l *Localize) GetTranslations() []i18n.MessageFile {
+// GetTranslations returns an array with localization files
+func (l *localize) GetTranslations() []i18n.MessageFile {
 	return l.translations
 }

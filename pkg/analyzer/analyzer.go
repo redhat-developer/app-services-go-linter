@@ -12,6 +12,7 @@ import (
 )
 
 var (
+	// An Analyzer describes an analysis function and its options.
 	Analyzer = &analysis.Analyzer{
 		Name:             "goi18nlinter",
 		Doc:              "goi18nlinter",
@@ -37,7 +38,7 @@ func (i *instantiate) run(pass *analysis.Pass) (interface{}, error) {
 		i.messages = make(map[string]string)
 		localizer, err := localize.New(nil, path)
 		if err != nil {
-			log.Panicln(err)
+			log.Fatal(err)
 		}
 
 		for _, file := range localizer.GetTranslations() {
