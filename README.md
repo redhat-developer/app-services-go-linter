@@ -7,7 +7,8 @@ As of right now the project created exclusively for [Command Line Interface for 
 you can adopt it for your needs by specifying the following command line options:
 ```bash
 -path string
-  Path to the directory with localization files. If nothing specified, linter will try to load i18n messages from files located in pkg/localize/locales directory.
+  Path to the directory with localization files. 
+  If nothing specified, linter will try to load i18n messages from files located in pkg/localize/locales directory.
 
 -mustLocalize string
   Name of the function that loads an i18n message. (default "MustLocalize")
