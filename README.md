@@ -1,8 +1,8 @@
-# go-i18n-linter
+# app-services-go-linter
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/alexal/go-i18n-linter)](https://goreportcard.com/report/github.com/alexal/go-i18n-linter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/redhat-developer/app-services-go-linter)](https://goreportcard.com/report/github.com/redhat-developer/app-services-go-linter)
 
-**go-i18n-linter** plugin analyze source tree of Go files and validates the availability of i18n strings in *.toml files.
+**app-services-go-linter** plugin analyze source tree of Go files and validates the availability of i18n strings in *.toml files.
 As of right now the project created exclusively for [Command Line Interface for RHOAS](https://github.com/redhat-developer/app-services-cli), however, 
 you can adopt it for your needs by specifying the following command line options:
 ```bash
