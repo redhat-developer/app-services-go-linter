@@ -1,4 +1,4 @@
-module github.com/alexal/go-i18n-linter
+module github.com/redhat-developer/app-services-go-linter
 
 go 1.16
 

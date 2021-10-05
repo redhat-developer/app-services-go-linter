@@ -1,9 +1,9 @@
 binary:
-	go build -o go-i18n-linter ./cmd/go-i18n-linter
+	go build -o app-services-go-linter ./cmd/app-services-go-linter
 .PHONY: binary
 
 plg:
-	go build -buildmode=plugin plugin/goi18nlinter.go
+	go build -buildmode=plugin plugin/appservicesgolinter.go
 .PHONY: plg
 
 lint:

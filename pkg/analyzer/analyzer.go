@@ -1,7 +1,7 @@
 package analyzer
 
 import (
-	"github.com/alexal/go-i18n-linter/pkg/localize"
+	"github.com/redhat-developer/app-services-go-linter/pkg/localize"
 	"go/ast"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -14,8 +14,8 @@ import (
 var (
 	// Analyzer describes an analysis function and its options.
 	Analyzer = &analysis.Analyzer{
-		Name:             "goi18nlinter",
-		Doc:              "goi18nlinter",
+		Name:             "appservicesgolinter",
+		Doc:              "Analyzes source tree of Go files and validates the availability of i18n strings in *.toml files.",
 		Run:              new(instantiate).run,
 		Requires:         []*analysis.Analyzer{inspect.Analyzer},
 		RunDespiteErrors: true,
