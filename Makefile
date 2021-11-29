@@ -1,5 +1,5 @@
 binary:
-	go build -o app-services-go-linter ./cmd/app-services-go-linter
+	go build -o rhoas-lint ./cmd/app-services-go-linter
 .PHONY: binary
 
 plg:
