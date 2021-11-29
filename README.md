@@ -2,6 +2,8 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/redhat-developer/app-services-go-linter)](https://goreportcard.com/report/github.com/redhat-developer/app-services-go-linter)
 
+Linter is used in https://github.com/redhat-developer/app-services-cli
+
 **app-services-go-linter** plugin analyze source tree of Go files and validates the availability of i18n strings in *.toml files.
 As of right now the project created exclusively for [Command Line Interface for RHOAS](https://github.com/redhat-developer/app-services-cli), however, 
 you can adopt it for your needs by specifying the following command line options:
